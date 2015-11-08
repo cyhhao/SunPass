@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Sun Pass</title>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="container" id="pass_list">
+    <div class="row text-center">
+        <h1>{{title}}</h1><input id="publicStr" type="hidden" value="{{publickey}}">
+        <br>
+    </div>
+    %if user:
+    <button id="logout" class="btn center-block" style="margin: 10px"
+            v-on="click: logoutClick">Logout
+    </button>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Label</th>
+                    <th>UserName</th>
+                    <th>Password</th>
+                    <th>Operating</th>
+
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-repeat="item in items">
+                    <td>
+                        <input id="item_label_[[$index]]" class="form-control" type="text" data-toggle="tooltip"
+                               data-placement="right" title="click to go"
+                               v-readonly="item.control.status | ZHstatus 'show' 'readonly'"
+                               v-model="item.model.label"
+                               placeholder="Label" style="width:60%;height:100%"
+                               data-original-title="[[item.control.status | ZHstatus 'show' 'title']]"
+                               v-on="click: labelClick(item)">
+                        <input id="item_url_[[$index]]"
+                               class="form-control [[item.control.status | ZHstatus 'edit' 'class']]" type="text"
+                               v-model="item.model.url"
+                               placeholder="Website" style="width:60%;height:100%">
+                    </td>
+                    <td>
+                        <input id="item_user_[[$index]]" class="form-control" type="text"
+                               v-readonly="item.control.status | ZHstatus 'show' 'readonly'"
+                               v-model="item.model.user"
+                               placeholder="UserName" style="width:60%;height:100%">
+                    </td>
+                    <td>
+                        <div data-toggle="tooltip" data-placement="left" title="click to copy">
+                            <div
+                                    class="copy btn btn-default"
+                                    v-class="item.control.status | ZHstatus 'show' 'class'"
+                                    data-clipboard-text="[[item.model.password]]" style="margin: 10px">copy
+                            </div>
+                        </div>
+                        <button
+                                class="btn [[item.control.status | ZHstatus 'edit' 'class']]"
+                                style="margin: 10px"
+                                v-on="click: randomClick(item)">Random
+                        </button>
+                        <span class="[[item.control.status | ZHstatus 'edit' 'class']]">
+                            len: [[item.model.password.length]]
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn [[item.control.status | ZHstatus 'show' 'class']]" style="margin: 10px"
+                                v-on="click: editClick(item)">Edit
+                        </button>
+                        <button class="btn btn-warning [[item.control.status | ZHstatus 'edit' 'class']]"
+                                style="margin: 10px"
+                                v-on="click: closeClick(item)">Don't Save
+                        </button>
+                        <button class="btn btn-success [[item.control.status | ZHstatus 'edit' 'class']]"
+                                style="margin: 10px"
+                                v-on="click: saveClick(item)">Save
+                        </button>
+                        <button class="btn btn-danger [[item.control.status | ZHstatus 'edit' 'class']]"
+                                style="margin: 10px"
+                                v-on="click: deleteClick($index,item)">Delete
+                        </button>
+                    </td>
+
+                </tr>
+                </tbody>
+                <tfoot>
+                <tr>
+                    <td>
+                        <button class="btn btn-success" v-on="click: addClick">Add</button>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                </tfoot>
+            </table>
+
+        </div>
+    </div>
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel"></h4>
+                </div>
+                <div class="modal-body">
+                    <h1>copy succeed</h1>
+                </div>
+                <div class="modal-footer hide">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    %else:
+    <div class="row">
+        <div class="center-block" style="width: 200px;">
+            <div class="form-group">
+                <label>
+                    UserName
+                    <input id="user" class="form-control" type="text">
+                </label>
+            </div>
+            <div class="form-group" style="">
+                <label>
+                    Password
+                    <input id="pass" class="form-control" type="password">
+                </label>
+            </div>
+            <div class="form-group text-center">
+                <input id="submit" type="button" class="btn btn-success" value="Login">
+            </div>
+        </div>
+    </div>
+    %end
+</div>
+<script src="/static/js/cryptico.js"></script>
+<script src="/static/js/jquery-2.1.4.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+
+
+<script>
+    var publicKeyFromString = function (string) {
+        var tokens = string.split("|");
+        var N = tokens[0];
+        console.log(N);
+        var E = tokens.length > 1 ? tokens[1] : "03";
+        var rsa = new RSAKey();
+        rsa.setPublic(N, E);
+        return rsa
+    };
+    function _splitStr(text, length) {
+        var list = [];
+        for (var i = 0; i < text.length / length; i++) {
+            list.push(text.substr(i * length, length));
+        }
+        return list;
+    }
+    cryptico.encrypt = function (plaintext, publickeystring) {
+        var cipherblock = "";
+        try {
+            var publickey = publicKeyFromString(publickeystring);
+            var list = _splitStr(plaintext, 117);
+            console.log(list);
+            for (var i = 0; i < list.length; i++) {
+                if (i >= 1) cipherblock += '|';
+                cipherblock += cryptico.b16to64(publickey.encrypt(list[i]));
+            }
+        }
+        catch (err) {
+            return {status: "Invalid public key" + " " + err};
+        }
+        return {status: "success", cipher: cipherblock};
+    };
+    cryptico.decrypt = function (ciphertext, key) {
+        var list = ciphertext.split('|');
+        var Str = "";
+        for (var i = 0; i < list.length; i++) {
+            Str += key.decrypt(cryptico.b64to16(list[i]));
+        }
+
+        var plaintext = Str;
+        if (plaintext == null) {
+            return {status: "failure"};
+        }
+        else {
+            return {
+                status: "success",
+                plaintext: plaintext
+            }
+        }
+    };
+    function sha2aeskey(sha) {
+        return cryptico.b256to64(sha).slice(0, 32)
+    }
+    window.getCookie = function (name) {
+        var r = document.cookie.match("\\b" + name + "=([^;]*)\\b");
+        return r ? r[1] : undefined;
+    };
+</script>
+
+%if user:
+<script src="/static/js/vue.js"></script>
+<script src="/static/js/ZeroClipboard.min.js"></script>
+<script>
+    Vue.config.delimiters = ['[[', ']]'];
+    Vue.filter("ZHstatus", function (status, which, type) {
+        if (type == "class") {
+            if (status == which)return "";
+            else return "hide";
+        }
+        else if (type == 'readonly') {
+            return status == 'show';
+        }
+        else if (type == 'title') {
+            if (status == 'show') return "click to go";
+            else return "";
+        }
+    });
+
+    Vue.directive('readonly', {
+        update: function (value) {
+            if (value) {
+                $(this.el).attr("readonly", "true");
+            }
+            else {
+                $(this.el).removeAttr("readonly");
+            }
+        }
+    });
+
+    var pass_list = new Vue({
+        el: '#pass_list',
+        data: {
+            items: []
+        },
+        methods: {
+            addClick: function () {
+                pass_list.items.push({
+                    model: {id: sha256.hex(String(Math.random())), label: "", url: "", user: "", password: randPassword()},
+                    control: {old_model: {}, status: "edit"}
+                });
+                Vue.nextTick(function () {
+                    bindCopy($('.copy'));
+                });
+            },
+            deleteClick: function (index, item) {
+                if (window.confirm('Are you sure ?')) {
+
+                    $.post('/ajax/deletePass', {
+                        token: getCookie('token'),
+                        id: item.model.id
+                    }, function (data, status) {
+                        if (data.code == 1) {
+                            pass_list.items.splice(index, 1)
+                        }
+                        Vue.nextTick(function () {
+                            bindCopy($('.copy'));
+                        });
+                    }, 'json');
+                }
+
+            },
+            labelClick: function (item) {
+                if (item.model.url != "" && item.control.status == 'show')
+                    window.open(item.model.url);
+            },
+            editClick: function (item) {
+                item.control.status = "edit";
+                item.control.old_model = JSON.parse(JSON.stringify(item.model));
+            },
+            closeClick: function (item) {
+                item.control.status = "show";
+                item.model = JSON.parse(JSON.stringify(item.control.old_model));
+            },
+            saveClick: function (item) {
+                var count = 0;
+                var mystr = item.model.label + item.model.user;
+                for (it in pass_list.items) {
+                    var tem = pass_list.items[it].model.label + pass_list.items[it].model.user;
+                    if (tem == mystr) {
+                        count++;
+                    }
+                }
+                if(!/http:\/\//.test(item.model.url) && !/https:\/\//.test(item.model)){
+                    item.model.url="http://"+item.model.url;
+                }
+
+                if (count >= 2) {
+                    alert("Can't save ! You have the same label and user item .");
+                }
+                else if(item.model.label=="" || item.model.user==""){
+                    alert("Can't save !  Label and user couldn't be empty .")
+                }
+                else{
+                    var publicStr = $('#publicStr').val();
+                    //item.model.password
+                    var e_text = cryptico.encryptAESCBC(JSON.stringify(item.model), sha2aeskey(sessionStorage.password))
+                    e_text += "|" + item.model.id;
+
+                    var model = cryptico.encrypt(e_text, publicStr).cipher;
+                    $.post('/ajax/editPass', {
+                        token: getCookie('token'),
+                        item: model
+                    }, function (data, status) {
+                        if (data.code == 1) {
+                            item.control.status = "show";
+                        }
+                        else {
+                            alert(data.msg);
+                        }
+                    }, 'json');
+                }
+            },
+            randomClick: function (item) {
+                item.model.password = randPassword();
+            },
+            logoutClick: function () {
+                $.post('/logout', {
+                    token: getCookie('token')
+                }, function (data) {
+                    if (data.code == 1) {
+                        sessionStorage.password=null;
+                        window.location.href = location.href;
+                    }
+                    else {
+                        alert(data.msg);
+                    }
+                }, 'json')
+            }
+        }
+    });
+    function randPassword() {
+        console.log(Math.random());
+        var text = ['abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '1234567890', '~!@#$%^&*()_+";",./?<>'];
+        var rand = function (min, max) {
+            return parseInt(min + Math.random() * (max - min + 1))
+        };
+        var len = rand(8, 16);
+        var pw = '';
+        for (var i = 0; i < len; ++i) {
+            var strpos = rand(0, 3);
+            pw += text[strpos].charAt(rand(0, text[strpos].length - 1));
+        }
+        return pw;
+    }
+    client = null;
+    function bindCopy(list) {
+        console.log("bind: " + list.length);
+        $('[data-toggle="tooltip"]').tooltip();
+//        $('[data-toggle="tooltip"]').mousedown(function () {
+//            $(this).tooltip('hide')
+//        });
+        if (client) client.destroy();
+        client = new ZeroClipboard(list);
+        client.on("ready", function (readyEvent) {
+
+
+            client.on("aftercopy", function (event) {
+//            var tip=$(event.target).parent();
+//            tip.attr('data-original-title','succeed');
+//            tip.tooltip('show');
+//            tip.attr('data-original-title','click to copy');
+//              alert("copy");
+//              $("#item_copy_ok_0").text("copy ok");
+                $('#myModal').modal('show');
+                setTimeout(function () {
+                    $('#myModal').modal('hide');
+                }, 1000);
+
+            });
+        });
+
+
+//        if(window.copy!=null) {
+//            window.copy.unclip();
+//        }
+//        list.each(function(){
+//            window.copy = new ZeroClipboard(list);
+//            window.copy.on("ready", function (readyEvent) {
+//                window.copy.on("aftercopy", function (event) {
+//                    var tip=$(event.target).parent();
+//                    tip.attr('data-original-title','succeed');
+//                    tip.tooltip('show');
+//                    tip.attr('data-original-title','click to copy');
+//                });
+//            });
+//        });
+
+    }
+
+
+</script>
+<script>
+
+    $(document).ready(function () {
+        // The passphrase used to repeatably generate this RSA key.
+        var PassPhrase = "" + Math.random();
+        // The length of the RSA key, in bits.
+        var Bits = 1024;
+        var MattsRSAkey = cryptico.generateRSAKey(PassPhrase, Bits);
+
+        console.log(MattsRSAkey.n + "|" + MattsRSAkey.e);
+        //alert(MattsRSAkey.n+"|"+MattsRSAkey.e);
+        $.post('/ajax/getPass', {
+            token: getCookie('token'),
+            n: String(MattsRSAkey.n),
+            e: String(MattsRSAkey.e)
+        }, function (data, status) {
+            if (data.code == 1) {
+                var DecryptionResult = cryptico.decrypt(String(data.data), MattsRSAkey);
+                var base = DecryptionResult.plaintext;
+                var dict = JSON.parse(base);
+                //var models=[];
+                pass_list.items = [];
+                for (var i in dict) {
+                    var ans = cryptico.decryptAESCBC(dict[i], sha2aeskey(sessionStorage.password));
+                    pass_list.items.push({
+                        model: JSON.parse(ans),
+                        control: {old_model: {}, status: "show"}
+                    });
+                }
+                Vue.nextTick(function () {
+                    bindCopy($('.copy'));
+                });
+
+
+                //console.log("res: "+models);
+            }
+            else {
+                alert("Failed to get the password . Try to refresh this page")
+            }
+        }, 'json');
+
+
+    });
+
+</script>
+%else:
+<script>
+
+    $('#submit').click(function () {
+        var username = $('#user').val();
+        var password = $('#pass').val();
+        var publicStr = $('#publicStr').val();
+
+        var sha_password = sha256.hex(password);
+
+        username = cryptico.encrypt(username, publicStr).cipher;
+        password = cryptico.encrypt(sha_password, publicStr).cipher;
+        $.post('/ajax/login', {
+            user: username,
+            password: password,
+            token: getCookie('token')
+        }, function (data, status) {
+            if (data.code == 1) {
+                sessionStorage.password = sha_password;
+                location.href = location.href;
+            }
+            else {
+                alert(data.msg);
+            }
+        }, 'json');
+    });
+
+    document.onkeydown = function (e) {
+        var ev = document.all ? window.event : e;
+        if (ev.keyCode == 13) {
+            $('#submit').click();
+        }
+    }
+</script>
+%end
+</body>
+</html>
