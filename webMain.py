@@ -45,7 +45,7 @@ def index(user, session):
         title = 'Hello !'
         # response.delete_cookie("guest")
     response.set_cookie("guest", new_guest, path='/')
-    return dict(title=title, user=user, publickey=public)
+    return dict(title=title, user=user, publickey=public, versions=1)
 
 
 @post('/ajax/login')

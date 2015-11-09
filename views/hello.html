@@ -29,6 +29,7 @@
 
                 </tr>
                 </thead>
+                <div class="loading text-center"><h2>Loading...</h2></div>
                 <tbody class="datarow hide">
                 <tr v-repeat="item in items">
                     <td>
@@ -151,9 +152,9 @@
 <script src="/static/js/vue.js"></script>
 <script src="/static/js/ZeroClipboard.min.js"></script>
 <script src="/static/js/base64.js"></script>
-<script src="/static/js/mainPage.js"></script>
+<script language="JavaScript" src="/static/js/mainPage.js?v={{versions}}"></script>
 %else:
-<script src="/static/js/loginPage.js"></script>
+<script language="JavaScript" src="/static/js/loginPage.js?v={{versions}}"></script>
 %end
 </body>
 </html>

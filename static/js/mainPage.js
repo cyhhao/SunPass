@@ -192,6 +192,7 @@ $(document).ready(function () {
             }
             Vue.nextTick(function () {
                 $('.datarow').removeClass("hide");
+                $('.loading').addClass("hide");
                 bindCopy($('.copy'));
             });
         }
