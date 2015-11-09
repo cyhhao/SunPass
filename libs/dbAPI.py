@@ -1,17 +1,29 @@
 # coding:utf8
 import hashlib
 import json
+import os
 
 __author__ = 'cyh'
 
-users_path = './users.json'
+data_path = './data'
+users_path = data_path + '/users.json'
+password_path = data_path + '/password'
+
+
+def makeDir():
+    if not os.path.exists(data_path):
+        os.makedirs(data_path)
+    if not os.path.exists(users_path):
+        open(users_path, "w").close()
+    if not os.path.exists(password_path):
+        os.makedirs(password_path)
 
 
 def savePassword(user, allPass):
     if not checkName(user):
         return None
 
-    with open('./password/%s.json' % user, 'w') as file:
+    with open(password_path + '/%s.json' % user, 'w') as file:
         text = json.dumps(allPass)
         file.write(text)
         file.flush()
@@ -84,7 +96,7 @@ def loadPassword(user):
     if not checkName(user):
         return None
     try:
-        with open('./password/%s.json' % user, 'r') as file:
+        with open(password_path + '/%s.json' % user, 'r') as file:
             text = file.read()
             allPass = json.loads(text)
             return allPass

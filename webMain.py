@@ -3,11 +3,13 @@ import hashlib
 import json
 import random
 import time
+
 import rsa
+
 from libs import Session
 from libs.Middleware import Xsrf, Auth
 from libs.SecretTools import deRSA, enRSA, createRSA, enAES
-from libs.dbAPI import savePassword, readUsers, loadPassword
+from libs.dbAPI import savePassword, readUsers, loadPassword, makeDir
 from settings import port
 
 
@@ -155,8 +157,7 @@ def deletePass(user, session):
     return resJSON(1, "bye")
 
 
-
-
 if __name__ == '__main__':
+    makeDir()
     readUsers()
-    run(host='localhost', port=port)
+    run(host='127.0.0.1', port=port)

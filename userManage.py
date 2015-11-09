@@ -5,7 +5,7 @@ import json
 import os
 import sys
 
-from libs.dbAPI import checkName, addUser, updateUser, deleteUser, readUsers
+from libs.dbAPI import checkName, addUser, updateUser, deleteUser, readUsers, makeDir
 
 
 __author__ = 'cyh'
@@ -72,6 +72,7 @@ def control():
 
 
 if __name__ == '__main__':
+    makeDir()
     help = """
     python userManage.py [option][value]...
 
