@@ -3,9 +3,7 @@ import hashlib
 import json
 import random
 import time
-
 import rsa
-
 from libs import Session
 from libs.Middleware import Xsrf, Auth
 from libs.SecretTools import deRSA, enRSA, createRSA, enAES

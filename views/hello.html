@@ -28,7 +28,7 @@
 
                 </tr>
                 </thead>
-                <tbody>
+                <tbody class="datarow hide">
                 <tr v-repeat="item in items">
                     <td>
                         <input id="item_label_[[$index]]" class="form-control" type="text" data-toggle="tooltip"
@@ -246,7 +246,13 @@
         methods: {
             addClick: function () {
                 pass_list.items.push({
-                    model: {id: sha256.hex(String(Math.random())), label: "", url: "", user: "", password: randPassword()},
+                    model: {
+                        id: sha256.hex(String(Math.random())),
+                        label: "",
+                        url: "",
+                        user: "",
+                        password: randPassword()
+                    },
                     control: {old_model: {}, status: "edit"}
                 });
                 Vue.nextTick(function () {
@@ -291,17 +297,17 @@
                         count++;
                     }
                 }
-                if(!/http:\/\//.test(item.model.url) && !/https:\/\//.test(item.model)){
-                    item.model.url="http://"+item.model.url;
+                if (!/http:\/\//.test(item.model.url) && !/https:\/\//.test(item.model)) {
+                    item.model.url = "http://" + item.model.url;
                 }
 
                 if (count >= 2) {
                     alert("Can't save ! You have the same label and user item .");
                 }
-                else if(item.model.label=="" || item.model.user==""){
+                else if (item.model.label == "" || item.model.user == "") {
                     alert("Can't save !  Label and user couldn't be empty .")
                 }
-                else{
+                else {
                     var publicStr = $('#publicStr').val();
                     //item.model.password
                     var e_text = cryptico.encryptAESCBC(encode64(utf16to8(JSON.stringify(item.model))), sha2aeskey(sessionStorage.password))
@@ -329,7 +335,7 @@
                     token: getCookie('token')
                 }, function (data) {
                     if (data.code == 1) {
-                        sessionStorage.password=null;
+                        sessionStorage.password = null;
                         window.location.href = location.href;
                     }
                     else {
@@ -357,44 +363,16 @@
     function bindCopy(list) {
         console.log("bind: " + list.length);
         $('[data-toggle="tooltip"]').tooltip();
-//        $('[data-toggle="tooltip"]').mousedown(function () {
-//            $(this).tooltip('hide')
-//        });
         if (client) client.destroy();
         client = new ZeroClipboard(list);
         client.on("ready", function (readyEvent) {
-
-
             client.on("aftercopy", function (event) {
-//            var tip=$(event.target).parent();
-//            tip.attr('data-original-title','succeed');
-//            tip.tooltip('show');
-//            tip.attr('data-original-title','click to copy');
-//              alert("copy");
-//              $("#item_copy_ok_0").text("copy ok");
                 $('#myModal').modal('show');
                 setTimeout(function () {
                     $('#myModal').modal('hide');
                 }, 1000);
-
             });
         });
-
-
-//        if(window.copy!=null) {
-//            window.copy.unclip();
-//        }
-//        list.each(function(){
-//            window.copy = new ZeroClipboard(list);
-//            window.copy.on("ready", function (readyEvent) {
-//                window.copy.on("aftercopy", function (event) {
-//                    var tip=$(event.target).parent();
-//                    tip.attr('data-original-title','succeed');
-//                    tip.tooltip('show');
-//                    tip.attr('data-original-title','click to copy');
-//                });
-//            });
-//        });
 
     }
 
@@ -424,13 +402,14 @@
                 pass_list.items = [];
                 for (var i in dict) {
                     var ans = cryptico.decryptAESCBC(dict[i], sha2aeskey(sessionStorage.password));
-                    var de_base=utf8to16(decode64(ans));
+                    var de_base = utf8to16(decode64(ans));
                     pass_list.items.push({
                         model: JSON.parse(de_base),
                         control: {old_model: {}, status: "show"}
                     });
                 }
                 Vue.nextTick(function () {
+                    $('.datarow').removeClass("hide");
                     bindCopy($('.copy'));
                 });
 
