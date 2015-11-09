@@ -13,6 +13,7 @@ __author__ = 'cyh'
 from bottle import route, run, view, static_file, post, request, response, abort
 
 session_timeout = 600
+port = 80
 
 
 def _splitStr(message, length):
@@ -77,7 +78,7 @@ def Auth(func):
         guest_session_id = request.get_cookie("guest")
         guest_session = Session.getGuest(guest_session_id)
         private = Session.getGuest_key(guest_session_id, 'privateKey')
-        user = None if guest_session is None or 'user'not in guest_session else guest_session['user']
+        user = None if guest_session is None or 'user' not in guest_session else guest_session['user']
 
         user_ans = session_ans = de_session = session_id = None
         try:
@@ -133,12 +134,11 @@ def index(user, session):
     guest = request.get_cookie("guest")
     new_guest = Session.updateGuest(guest, {'privateKey': private})
 
-
     if user is not None:
         title = 'Hello %s !' % user
     else:
         title = 'Hello !'
-        #response.delete_cookie("guest")
+        # response.delete_cookie("guest")
     response.set_cookie("guest", new_guest, path='/')
     return dict(title=title, user=user, publickey=public)
 
@@ -215,6 +215,7 @@ def editPass(user, session):
 
     return resJSON(0, "Error. try refresh the page")
 
+
 @post('/ajax/deletePass')
 @Auth
 @Xsrf
@@ -283,4 +284,4 @@ def readUsers():
 
 if __name__ == '__main__':
     readUsers()
-    run(host='localhost', port=80)
+    run(host='localhost', port=port)
