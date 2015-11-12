@@ -54,9 +54,14 @@
                     <td>
                         <div data-toggle="tooltip" data-placement="left" title="click to copy">
                             <div
-                                    class="copy btn btn-default"
+                                    class="copy btn btn-default hidden-sm hidden-xs"
                                     v-class="item.control.status | ZHstatus 'show' 'class'"
                                     data-clipboard-text="[[item.model.password]]" style="margin: 10px">copy
+                            </div>
+                            <div
+                                    class="hidden-md hidden-lg"
+                                    v-class="item.control.status | ZHstatus 'show' 'class'"
+                                    style="margin: 10px">[[item.model.password]]
                             </div>
                         </div>
                         <button

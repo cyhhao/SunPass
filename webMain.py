@@ -79,13 +79,11 @@ def login():
 @Xsrf
 def getPass(user, session):
     users = readUsers()
-    print "user:", user
     if user and user in users:
         n = request.forms.n
         e = request.forms.e
         publicKey = rsa.PublicKey(int(n), int(e))
         allPass = loadPassword(user)
-        print allPass
         message = json.dumps(allPass)
         after = enRSA(message, publicKey)
         return resJSON(1, "ok", after)
@@ -100,23 +98,23 @@ def editPass(user, session):
     guest_key = request.get_cookie("guest")
 
     private = Session.getGuest_key(guest_key, 'privateKey')
-    # try:
-    if user and user in users and private:
-        item = request.forms.item
-        item = deRSA(item, private)
+    try:
+        if user and user in users and private:
+            item = request.forms.item
+            item = deRSA(item, private)
 
-        item = item.split("|")
-        id = item[1]
-        value = item[0]
+            item = item.split("|")
+            id = item[1]
+            value = item[0]
 
-        allPass = loadPassword(user)
+            allPass = loadPassword(user)
 
-        allPass[id] = value
-        savePassword(user, allPass)
+            allPass[id] = value
+            savePassword(user, allPass)
 
-        return resJSON(1, "save ok")
-    # except Exception:
-    # print Exception
+            return resJSON(1, "save ok")
+    except Exception:
+        print Exception
 
     return resJSON(0, "Error. try refresh the page")
 
@@ -127,18 +125,18 @@ def editPass(user, session):
 def deletePass(user, session):
     users = readUsers()
 
-    # try:
-    if user and user in users:
-        id = request.forms.id
-        allPass = loadPassword(user)
-        if id in allPass:
-            del allPass[id]
-            savePassword(user, allPass)
-            return resJSON(1, "delete ok")
-        else:
-            return resJSON(1, "delete already")
-    # except Exception:
-    # print Exception
+    try:
+        if user and user in users:
+            id = request.forms.id
+            allPass = loadPassword(user)
+            if id in allPass:
+                del allPass[id]
+                savePassword(user, allPass)
+                return resJSON(1, "delete ok")
+            else:
+                return resJSON(1, "delete already")
+    except Exception:
+        print Exception
 
     return resJSON(0, "Error. try refresh the page")
 
