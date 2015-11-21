@@ -6,10 +6,6 @@ import poplib
 
 __author__ = 'cyh'
 
-email = 'cyhhao2013@126.com'
-password = r'M77Lr6~?>2uG4c'
-pop3_server = 'pop.126.com'
-
 
 def guess_charset(msg):
     # 先从msg对象获取编码:
@@ -24,15 +20,33 @@ def guess_charset(msg):
 
 
 class emailPOP():
-
-    def __init__(self):
-        self.server = poplib.POP3(pop3_server)
-        self.server.user(email)
-        self.server.pass_(password)
-        self.split = 0
-        self.updateList()
+    def __init__(self, email, password, pop3_server):
+        self.pop3_server = pop3_server
+        self.email = email
+        self.password = password
+        self.Create()
+        self.Auth()
+        self.mails_list = []
+        self.split = self.getListLen()
         self.dict = {}
         self.subjectDict = {}
+        self.updateList()
+
+    def Create(self):
+        self.server = poplib.POP3(self.pop3_server)
+
+    def Auth(self):
+        self.server.user(self.email)
+        self.server.pass_(self.password)
+
+    def Quit(self):
+        self.server.quit()
+
+    def Update(self):
+        self.Quit()
+        self.Create()
+        self.Auth()
+
 
     def parser(self, id, lines):
         msg_content = '\r\n'.join(lines)
@@ -53,34 +67,32 @@ class emailPOP():
         resp, lines, octets = self.server.top(index, 0)
         return lines
 
-    def find_by_Subject(self,signal, condition='=', relation='and'):
-        for li in self.mails_list:
-            if li in self.dict:
-                content = self.dict[li]
-            else:
-                content = self.parser(li, self.getEmail_header(li))
-            if condition == '=':
-                flag = False
-                for k, v in signal.iter():
-                    if relation == 'and':
-                        flag = flag and (k in content and content[k] == v)
-                    elif relation == 'or':
-                        flag = flag or (k in content and content[k] == v)
-                if flag:
-                    return li
-        return None
+    def find_by_Subject(self, subject, condition='='):
+        if subject in self.subjectDict:
+            return self.subjectDict[subject]
+        else:
+            return None
+
+    def getListLen(self):
+        resp, mails_list, octets = self.server.list()
+        return len(mails_list)
 
     def updateList(self):
-        resp, self.mails_list, octets = self.server.list()
+        self.Update()
+        resp, mails_list, octets = self.server.list()
+        self.mails_list = mails_list
         length = len(self.mails_list)
+        print length
         for i in xrange(self.split, length):
             content = self.parser(self.mails_list[i], self.getEmail_header(self.mails_list[i]))
+            print content
             subject = content['Subject']
+            subject = subject.strip()
             if subject in self.subjectDict:
-                self.subjectDict[subject].add(content)
+                self.subjectDict[subject].append(content)
             else:
                 self.subjectDict[subject] = [content]
-        self.split = length - 1
+        self.split = length
 
 
     def find(self, signal, condition='=', relation='and'):
