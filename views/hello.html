@@ -2,6 +2,7 @@
 <html>
 <head lang="en">
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,user-scalable=no" />
     <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon" />
     <title>Sun Pass</title>
     <link href="/static/css/bootstrap.min.css" rel="stylesheet">
@@ -37,19 +38,19 @@
                                data-placement="right" title="click to go"
                                v-readonly="item.control.status | ZHstatus 'show' 'readonly'"
                                v-model="item.model.label"
-                               placeholder="Label" style="width:60%;height:100%"
+                               placeholder="Label" style="width:90%;height:100%"
                                data-original-title="[[item.control.status | ZHstatus 'show' 'title']]"
                                v-on="click: labelClick(item)">
                         <input id="item_url_[[$index]]"
                                class="form-control [[item.control.status | ZHstatus 'edit' 'class']]" type="text"
                                v-model="item.model.url"
-                               placeholder="Website" style="width:60%;height:100%">
+                               placeholder="Website" style="width:90%;height:100%">
                     </td>
                     <td>
                         <input id="item_user_[[$index]]" class="form-control" type="text"
                                v-readonly="item.control.status | ZHstatus 'show' 'readonly'"
                                v-model="item.model.user"
-                               placeholder="UserName" style="width:60%;height:100%">
+                               placeholder="UserName" style="width:90%;height:100%">
                     </td>
                     <td>
                         <div data-toggle="tooltip" data-placement="left" title="click to copy">

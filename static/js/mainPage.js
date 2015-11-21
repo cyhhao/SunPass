@@ -177,6 +177,10 @@ $(document).ready(function () {
         e: String(MattsRSAkey.e)
     }, function (data, status) {
         if (data.code == 1) {
+            if(sessionStorage.password==null||sessionStorage.password==""){
+                $('#logout').click();
+                return;
+            }
             var DecryptionResult = cryptico.decrypt(String(data.data), MattsRSAkey);
             var base = DecryptionResult.plaintext;
             var dict = JSON.parse(base);
