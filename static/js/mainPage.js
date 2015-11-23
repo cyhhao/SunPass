@@ -168,7 +168,7 @@ $(document).ready(function () {
     // The passphrase used to repeatably generate this RSA key.
     var PassPhrase = "" + Math.random();
     // The length of the RSA key, in bits.
-    var Bits = 1024;
+    var Bits = RSA_Bits;
     var MattsRSAkey = cryptico.generateRSAKey(PassPhrase, Bits);
 
     $.post('/ajax/getPass', {

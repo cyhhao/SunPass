@@ -1,6 +1,9 @@
 /**
  * Created by cyh on 2015/11/9.
  */
+
+var RSA_Bits=512;
+var RSA_textMax=RSA_Bits/8-11;
 var publicKeyFromString = function (string) {
     var tokens = string.split("|");
     var N = tokens[0];
@@ -20,7 +23,7 @@ cryptico.encrypt = function (plaintext, publickeystring) {
     var cipherblock = "";
     try {
         var publickey = publicKeyFromString(publickeystring);
-        var list = _splitStr(plaintext, 117);
+        var list = _splitStr(plaintext, RSA_textMax);
         for (var i = 0; i < list.length; i++) {
             if (i >= 1) cipherblock += '|';
             cipherblock += cryptico.b16to64(publickey.encrypt(list[i]));

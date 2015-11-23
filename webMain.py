@@ -48,6 +48,21 @@ def index(user, session):
     return dict(title=title, user=user, publickey=public, versions=1)
 
 
+@route('/register')
+@view('register')
+def register():
+    response.set_cookie("token", str(random.random()), path='/')
+    s=time.time()
+    (public, private) = createRSA()
+    t=time.time()
+    print 'paid ',(t-s)*1000.0
+    guest = request.get_cookie("guest")
+    registCode = hashlib.sha1(str(random.random())).hexdigest()
+    new_guest = Session.updateGuest(guest, {'privateKey': private, 'registCode': registCode})
+
+    return dict(title="Register", publickey=public,registCode=registCode, versions=1)
+
+
 @post('/ajax/login')
 @Xsrf
 def login():
@@ -57,6 +72,7 @@ def login():
     guest_session_id = request.get_cookie("guest")
     private = Session.getGuest_key(guest_session_id, 'privateKey')
     try:
+        print user
         de_user = deRSA(user, private)
         de_password = deRSA(password, private)
         de_password = hashlib.sha512(de_password).hexdigest()
@@ -69,8 +85,8 @@ def login():
 
             response.set_cookie("session", encrypted, path='/')
             return resJSON(1, "ok")
-    except Exception:
-        print Exception
+    except Exception,e:
+        print e
     return resJSON(0, "Username or Password is Wrong")
 
 

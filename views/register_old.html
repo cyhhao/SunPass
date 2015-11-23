@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,user-scalable=no" />
+    <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon" />
+    <title>Sun Pass</title>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+    <div class="row text-center">
+        <h1>{{title}}</h1><input id="publicStr" type="hidden" value="{{publickey}}">
+        <br>
+    </div>
+
+    <div class="container text-center">
+        <h3 class="row">Frist , write an Email and copy following code as the Subject</h3>
+        <div class="row">
+            <h3><code>{{ registCode }}</code></h3>
+            <!--<div-->
+                <!--class="copy btn btn-default"-->
+                <!--data-clipboard-text="{{ registCode }}" style="margin: 10px">copy-->
+            <!--</div>-->
+        </div>
+        <h3 class="row">Then send the email to xxx</h3>
+        <button class="btn btn-success">I send send complete , Next</button>
+    </div>
+
+
+
+
+
+<script src="/static/js/cryptico.min.js"></script>
+<script src="/static/js/jquery-2.1.4.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+<script src="/static/js/commonLibs.js"></script>
+
+<script src="/static/js/vue.min.js"></script>
+<script src="/static/js/ZeroClipboard.min.js"></script>
+</body>
+</html>
