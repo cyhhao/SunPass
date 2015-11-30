@@ -41,7 +41,7 @@ function submitClick(){
         var username=pass_form.username;
         var password=pass_form.password;
         var sha_password = sha256.hex(password);
-        var sha_2password = CryptoJS.SHA512(sha_password).toString()
+        var sha_2password = CryptoJS.SHA512(sha_password).toString();
         username = cryptico.encrypt(username, publicStr).cipher;
         password = cryptico.encrypt(sha_2password, publicStr).cipher;
         $.post('/ajax/register',{
@@ -50,7 +50,13 @@ function submitClick(){
             validate:gt_captcha_obj.getValidate(),
             token: getCookie('token')
         },function(data,statu){
-            console.log(data);
+            if(data.code==1){
+                location.href="/"
+            }
+            else{
+                pass_form.tips_text=data.msg;
+                showTip();
+            }
         },'json');
     }
 }
