@@ -8,9 +8,10 @@ $('#submit').click(function () {
     var publicStr = $('#publicStr').val();
 
     var sha_password = sha256.hex(password);
+    var sha_2password=CryptoJS.SHA512(sha_password).toString();
 
     username = cryptico.encrypt(username, publicStr).cipher;
-    password = cryptico.encrypt(sha_password, publicStr).cipher;
+    password = cryptico.encrypt(sha_2password, publicStr).cipher;
     $.post('/ajax/login', {
         user: username,
         password: password,

@@ -100,6 +100,8 @@ var pass_list = new Vue({
             else {
                 var publicStr = $('#publicStr').val();
                 //item.model.password
+                console.log(JSON.stringify(item.model));
+                console.log(utf16to8(JSON.stringify(item.model)));
                 var e_text = cryptico.encryptAESCBC(encode64(utf16to8(JSON.stringify(item.model))), sha2aeskey(sessionStorage.password))
                 e_text += "|" + item.model.id;
 

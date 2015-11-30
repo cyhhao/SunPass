@@ -6,6 +6,7 @@
     <link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon" />
     <title>Sun Pass</title>
     <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/commonLibs.css" rel="stylesheet">
 </head>
 <body>
 
@@ -14,31 +15,39 @@
         <br>
     </div>
 
-    <div class="container">
+    <div class="container" id="pass_form">
         <div class="row">
             <div class="center-block" style="width: 200px;">
                 <div class="form-group">
                     <label>
                         UserName
-                        <input id="user" class="form-control" type="text">
+                        <input id="user" class="form-control" type="text" v-model="username">
                     </label>
                 </div>
                 <div class="form-group" style="">
                     <label>
                         Password
-                        <input id="pass" class="form-control" type="password">
+                        <input id="pass" class="form-control" type="password" v-model="password">
                     </label>
                 </div>
                 <div class="form-group" style="">
                     <label>
                         Password Again
-                        <input id="pass_again" class="form-control" type="password">
+                        <input id="pass_again" class="form-control" type="password" v-model="password_again">
                     </label>
                 </div>
+                <div id="GeetestCode" class="form-group">
+                    <input id="GeetestParam_id" class="hidden" v-model="gt_id" value="{{GeetestParam['id']}}"/>
+                    <input id="GeetestParam_challenge" class="hidden" v-model="gt_challenge" value="{{GeetestParam['challenge']}}"/>
+                </div>
                 <div class="form-group text-center">
-                    <input id="submit" type="button" class="btn btn-success" value="Register">
+                    <input id="submit" type="button" class="btn btn-success" value="Register"
+                            v-on="click:submitClick">
                 </div>
             </div>
+        </div>
+        <div class="row center">
+            <div id="tips" class="inline-block alert alert-danger hide" role="alert">[[tips_text]]</div>
         </div>
     </div>
 
@@ -50,8 +59,12 @@
 <script src="/static/js/jquery-2.1.4.min.js"></script>
 <script src="/static/js/bootstrap.min.js"></script>
 <script src="/static/js/commonLibs.js"></script>
-
+<script src="https://api.geetest.com/get.php"></script>
 <script src="/static/js/vue.min.js"></script>
-<script src="/static/js/ZeroClipboard.min.js"></script>
+<script language="JavaScript" src="/static/js/sha512.js"></script>
+<script src="/static/js/registerPage.js"></script>
+
+
+
 </body>
 </html>

@@ -50,7 +50,7 @@ def saveUsers(users):
         return False
 
 
-def addUser(username, password, override=False):
+def addUser(username, password, sha=True, override=False):
     users = readUsers()
     if username in users and not override:
         return False, "This user already exists"
@@ -63,7 +63,10 @@ def addUser(username, password, override=False):
             return flag, msg
         # 对密码进行两次Hash
         # 第一次为sha256 , 第二次为sha512
-        ps = hashlib.sha512(hashlib.sha256(password).hexdigest()).hexdigest()
+        if sha:
+            ps = hashlib.sha512(hashlib.sha256(password).hexdigest()).hexdigest()
+        else:
+            ps = password
         users[username] = ps
 
         flag = saveUsers(users)

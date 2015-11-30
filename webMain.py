@@ -7,12 +7,15 @@ import rsa
 from libs import Session
 from libs.Middleware import Xsrf, Auth
 from libs.SecretTools import deRSA, enRSA, createRSA, enAES
-from libs.dbAPI import savePassword, readUsers, loadPassword, makeDir
-from settings import port
+from libs.dbAPI import savePassword, readUsers, loadPassword, makeDir, checkName, checkPassword, addUser
+from libs.geetest import geetest
+from settings import port, captcha_id, private_key
 
 
 __author__ = 'cyh'
 from bottle import route, run, view, static_file, post, request, response
+
+gt = None
 
 
 def resJSON(status, msg="", data=None):
@@ -52,15 +55,53 @@ def index(user, session):
 @view('register')
 def register():
     response.set_cookie("token", str(random.random()), path='/')
-    s=time.time()
     (public, private) = createRSA()
-    t=time.time()
-    print 'paid ',(t-s)*1000.0
     guest = request.get_cookie("guest")
-    registCode = hashlib.sha1(str(random.random())).hexdigest()
-    new_guest = Session.updateGuest(guest, {'privateKey': private, 'registCode': registCode})
 
-    return dict(title="Register", publickey=public,registCode=registCode, versions=1)
+    new_guest = Session.updateGuest(guest, {'privateKey': private})
+    response.set_cookie("guest", new_guest, path='/')
+    return dict(title="Register",
+                publickey=public,
+                versions=1,
+                GeetestParam={
+                    "id": captcha_id,
+                    "challenge": gt.geetest_register()
+                })
+
+
+@post('/ajax/register')
+@Xsrf
+def registerAjax():
+    users = readUsers()
+    user = request.forms.get('user')
+    password = request.forms.get('password')
+
+    challenge = request.forms.get('validate[geetest_challenge]')
+    validate = request.forms.get('validate[geetest_validate]')
+    seccode = request.forms.get('validate[geetest_seccode]')
+
+    result = gt.geetest_validate(challenge, validate, seccode)
+    if not result:
+        return resJSON(0, "Validate Fail ")
+
+    guest_session_id = request.get_cookie("guest")
+    private = Session.getGuest_key(guest_session_id, 'privateKey')
+
+    try:
+        de_user = deRSA(user, private)
+        de_password = deRSA(password, private)
+
+
+        flag, msg = addUser(de_user, de_password, False)
+
+        if flag:
+            return resJSON(1, msg)
+        else:
+            return resJSON(0, msg)
+
+    except Exception, e:
+        print e
+    return resJSON(0, "Username or Password is Wrong")
 
 
 @post('/ajax/login')
@@ -72,20 +113,19 @@ def login():
     guest_session_id = request.get_cookie("guest")
     private = Session.getGuest_key(guest_session_id, 'privateKey')
     try:
-        print user
         de_user = deRSA(user, private)
         de_password = deRSA(password, private)
-        de_password = hashlib.sha512(de_password).hexdigest()
+        print de_user, de_password
+        print users[de_user]
 
         if de_user in users and users[de_user] == de_password:
             session_id = Session.set(de_user, None, {"user": de_user})
             encrypted = enAES(de_password, json.dumps({"user": de_user, "time": time.time(), "session_id": session_id}))
             new_guest = Session.updateGuest(guest_session_id, {'user': de_user})
             response.set_cookie("guest", new_guest, path='/')
-
             response.set_cookie("session", encrypted, path='/')
             return resJSON(1, "ok")
-    except Exception,e:
+    except Exception, e:
         print e
     return resJSON(0, "Username or Password is Wrong")
 
@@ -172,4 +212,5 @@ def deletePass(user, session):
 if __name__ == '__main__':
     makeDir()
     readUsers()
+    gt = geetest(captcha_id, private_key)
     run(host='127.0.0.1', port=port)
