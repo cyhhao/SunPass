@@ -11,7 +11,6 @@ from libs.dbAPI import savePassword, readUsers, loadPassword, makeDir, checkName
 from libs.geetest import geetest
 from settings import port, captcha_id, private_key
 
-
 __author__ = 'cyh'
 from bottle import route, run, view, static_file, post, request, response
 
@@ -30,6 +29,11 @@ def resJSON(status, msg="", data=None):
 
 @route('/static/<filename:path>')
 def server_static(filename):
+    return static_file(filename, root='./static')
+
+
+@route('/<filename:path>')
+def main(filename):
     return static_file(filename, root='./static')
 
 
@@ -90,7 +94,6 @@ def registerAjax():
     try:
         de_user = deRSA(user, private)
         de_password = deRSA(password, private)
-
 
         flag, msg = addUser(de_user, de_password, False)
 
